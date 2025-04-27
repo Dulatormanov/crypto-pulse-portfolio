@@ -28,8 +28,12 @@ export interface AiResponse {
 
 export type Currency = "usd" | "eur" | "kzt";
 
-// Backend API URL (change to your backend URL)
-const BACKEND_API_URL = "http://localhost:8000/api";
+// Backend API URL - will be overridden in production
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+
+// For production deployments, use this environment variable in Vercel
+// Example: VITE_API_URL=https://your-backend-url.onrender.com/api
+const BACKEND_API_URL = API_URL;
 
 // Fallback to direct CoinGecko API if backend is not available
 const COINGECKO_API_URL = "https://api.coingecko.com/api/v3";

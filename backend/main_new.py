@@ -24,8 +24,9 @@ else:
     print("AI Assistant functionality will be disabled")
     print("To enable, please set the OPENAI_API_KEY environment variable")
 
-# Port for the server
-PORT = 8000
+# Port for the server - use environment variable or default to 8000
+PORT = int(os.environ.get('PORT', 8000))
+print(f"Server will run on port {PORT}")
 
 # Global variables to store cached data
 crypto_data = {
@@ -166,7 +167,11 @@ class CryptoHandler(http.server.SimpleHTTPRequestHandler):
     def _set_headers(self, status_code=200, content_type='application/json'):
         self.send_response(status_code)
         self.send_header('Content-type', content_type)
-        self.send_header('Access-Control-Allow-Origin', '*')  # CORS header
+        
+        # Get allowed origin from environment or default to '*'
+        allowed_origin = os.environ.get('ALLOWED_ORIGIN', '*')
+        self.send_header('Access-Control-Allow-Origin', allowed_origin)
+        
         self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS, POST')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
