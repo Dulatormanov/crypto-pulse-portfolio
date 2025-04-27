@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -14,7 +13,7 @@ const Portfolio = () => {
   // Fetch cryptocurrency data
   const { data: cryptocurrencies = [], isLoading } = useQuery({
     queryKey: ["cryptocurrencies"],
-    queryFn: fetchCryptocurrencies,
+    queryFn: () => fetchCryptocurrencies(),
     refetchInterval: 60000, // Refetch every minute
     staleTime: 30000, // Consider data stale after 30 seconds
   });
@@ -25,7 +24,9 @@ const Portfolio = () => {
     savePortfolio(updatedPortfolio);
     
     const cryptoName = cryptocurrencies.find((c) => c.id === id)?.name || "Cryptocurrency";
-    toast.success(`Removed ${cryptoName} from your portfolio`);
+    toast.success(`Removed ${cryptoName} from your portfolio`, {
+      duration: 3000
+    });
   };
 
   // Calculate portfolio summary

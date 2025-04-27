@@ -61,13 +61,23 @@ const Index = () => {
       
       setPortfolio(updatedPortfolio);
       savePortfolio(updatedPortfolio);
-      toast.success(`Updated ${selectedCrypto?.name} in your portfolio`);
+      toast.success(`Updated ${selectedCrypto?.name} in your portfolio`, {
+        action: {
+          label: "View Portfolio",
+          onClick: () => window.location.href = "/portfolio"
+        }
+      });
     } else {
       // Add new item
       const newPortfolio = [...portfolio, { id, quantity, purchasePrice }];
       setPortfolio(newPortfolio);
       savePortfolio(newPortfolio);
-      toast.success(`Added ${selectedCrypto?.name} to your portfolio`);
+      toast.success(`Added ${selectedCrypto?.name} to your portfolio`, {
+        action: {
+          label: "View Portfolio",
+          onClick: () => window.location.href = "/portfolio"
+        }
+      });
     }
   };
 
