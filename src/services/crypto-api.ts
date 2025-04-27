@@ -20,6 +20,12 @@ export interface PortfolioItem {
   purchasePrice: number;
 }
 
+export interface AiResponse {
+  response?: string;
+  error?: string;
+  detail?: string;
+}
+
 export type Currency = "usd" | "eur" | "kzt";
 
 // Backend API URL (change to your backend URL)
@@ -74,6 +80,33 @@ export const fetchCryptocurrencies = async (currency: Currency = getPreferredCur
     console.error("Error fetching cryptocurrency data:", error);
     toast.error("Failed to fetch cryptocurrency data. Please try again later.");
     return [];
+  }
+};
+
+// Ask AI assistant for information about cryptocurrencies
+export const askAiAssistant = async (question: string, cryptoName?: string): Promise<AiResponse> => {
+  try {
+    const response = await fetch(`${BACKEND_API_URL}/ai-assistant`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        question,
+        cryptoName: cryptoName || 'general',
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to get AI response');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error getting AI assistant response:", error);
+    toast.error("Failed to get AI response. Please try again later.");
+    return { error: "Failed to communicate with AI assistant" };
   }
 };
 

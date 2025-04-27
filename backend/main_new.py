@@ -7,15 +7,22 @@ import threading
 import time
 import os
 from datetime import datetime
-import openai
 from dotenv import load_dotenv
+import openai
+import traceback
 
 # Load environment variables
 load_dotenv()
 
 # Get OpenAI API key from environment variable
 OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
-openai.api_key = OPENAI_API_KEY
+if OPENAI_API_KEY:
+    print("OpenAI API key found, AI Assistant will be enabled")
+    openai.api_key = OPENAI_API_KEY
+else:
+    print("⚠️ No OpenAI API key found in environment variables")
+    print("AI Assistant functionality will be disabled")
+    print("To enable, please set the OPENAI_API_KEY environment variable")
 
 # Port for the server
 PORT = 8000
@@ -69,8 +76,6 @@ def fetch_crypto_data(currency):
                 return []
     except Exception as e:
         print(f"Error fetching data from CoinGecko: {str(e)}")
-        # Detailed error information
-        import traceback
         print(f"Detailed error: {traceback.format_exc()}")
         return []
 
@@ -100,18 +105,10 @@ def updater():
         update_all_crypto_data()
         time.sleep(60)  # Wait for 60 seconds
 
-# Start the updater in a background thread
-updater_thread = threading.Thread(target=updater)
-updater_thread.daemon = True
-updater_thread.start()
-
-# Initialize data on startup
-update_all_crypto_data()
-
 # Function to generate AI response about cryptocurrencies
 def generate_crypto_ai_response(question, crypto_name=None):
     if not OPENAI_API_KEY:
-        return {"error": "OpenAI API key not configured"}
+        return {"error": "OpenAI API key not configured. Please set the OPENAI_API_KEY environment variable."}
     
     try:
         # Find the cryptocurrency data if a specific one is mentioned
@@ -142,7 +139,10 @@ def generate_crypto_ai_response(question, crypto_name=None):
         if crypto_info:
             user_prompt = f"{question}\n\nHere is the current data for this cryptocurrency:\n{crypto_info}"
         
-        response = openai.chat.completions.create(
+        # Make request to OpenAI API
+        print(f"Sending request to OpenAI API for question: {question}")
+        client = openai.OpenAI(api_key=OPENAI_API_KEY)
+        completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_message},
@@ -152,9 +152,13 @@ def generate_crypto_ai_response(question, crypto_name=None):
             temperature=0.7
         )
         
-        return {"response": response.choices[0].message.content}
+        response_text = completion.choices[0].message.content
+        print(f"Received response from OpenAI API: {response_text[:100]}...")
+        return {"response": response_text}
     except Exception as e:
-        print(f"Error generating AI response: {str(e)}")
+        error_msg = f"Error generating AI response: {str(e)}"
+        print(error_msg)
+        print(f"Detailed error: {traceback.format_exc()}")
         return {"error": "Failed to generate AI response", "detail": str(e)}
 
 # Custom request handler
@@ -215,7 +219,8 @@ class CryptoHandler(http.server.SimpleHTTPRequestHandler):
                 "status": "online",
                 "last_update": last_update_time.isoformat(),
                 "currencies_available": SUPPORTED_CURRENCIES,
-                "cached_currencies": list(crypto_data.keys())
+                "cached_currencies": list(crypto_data.keys()),
+                "ai_assistant_enabled": bool(OPENAI_API_KEY)
             }
             self._set_headers()
             self.wfile.write(json.dumps(status_response).encode())
@@ -257,6 +262,14 @@ class CryptoHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"error": "Not found"}).encode())
 
 def run_server():
+    # Start the updater in a background thread
+    updater_thread = threading.Thread(target=updater)
+    updater_thread.daemon = True
+    updater_thread.start()
+
+    # Initialize data on startup
+    update_all_crypto_data()
+    
     handler = CryptoHandler
     
     # Create the server with the handler

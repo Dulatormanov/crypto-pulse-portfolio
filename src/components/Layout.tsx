@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
@@ -48,7 +47,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <footer className="border-t border-secondary py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} CryptoWatcher. All rights reserved.</p>
-          <p className="mt-1">Powered by CoinGecko API</p>
         </div>
       </footer>
     </div>

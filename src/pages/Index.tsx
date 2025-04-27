@@ -15,7 +15,11 @@ import {
   getPreferredCurrency
 } from "@/services/crypto-api";
 
-const Index = () => {
+interface IndexProps {
+  onSelectCrypto?: (crypto: Cryptocurrency | undefined) => void;
+}
+
+const Index: React.FC<IndexProps> = ({ onSelectCrypto }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCrypto, setSelectedCrypto] = useState<Cryptocurrency | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -29,6 +33,13 @@ const Index = () => {
     refetchInterval: 60000, // Refetch every minute
     staleTime: 30000, // Consider data stale after 30 seconds
   });
+
+  // Update parent component when selected crypto changes
+  useEffect(() => {
+    if (onSelectCrypto) {
+      onSelectCrypto(selectedCrypto);
+    }
+  }, [selectedCrypto, onSelectCrypto]);
 
   // Handle currency change
   const handleCurrencyChange = (newCurrency: Currency) => {
