@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
@@ -10,20 +9,22 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Cryptocurrency, formatCurrency } from "@/services/crypto-api";
+import { Cryptocurrency, Currency, formatCurrency } from "@/services/crypto-api";
 
 interface AddToPortfolioDialogProps {
   crypto?: Cryptocurrency;
   isOpen: boolean;
   onClose: () => void;
   onAdd: (id: string, quantity: number, purchasePrice: number) => void;
+  currency: Currency;
 }
 
 const AddToPortfolioDialog: React.FC<AddToPortfolioDialogProps> = ({
   crypto,
   isOpen,
   onClose,
-  onAdd
+  onAdd,
+  currency
 }) => {
   const [quantity, setQuantity] = useState<string>("");
   const [purchasePrice, setPurchasePrice] = useState<string>("");
@@ -100,7 +101,7 @@ const AddToPortfolioDialog: React.FC<AddToPortfolioDialogProps> = ({
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">Total Cost</Label>
                 <div className="col-span-3">
-                  {formatCurrency(parseFloat(quantity) * parseFloat(purchasePrice))}
+                  {formatCurrency(parseFloat(quantity) * parseFloat(purchasePrice), currency)}
                 </div>
               </div>
             )}

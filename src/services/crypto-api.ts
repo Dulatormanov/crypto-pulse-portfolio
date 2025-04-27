@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 
 export interface Cryptocurrency {
@@ -21,16 +20,53 @@ export interface PortfolioItem {
   purchasePrice: number;
 }
 
-const API_URL = "https://api.coingecko.com/api/v3";
+export type Currency = "usd" | "eur" | "kzt";
 
-export const fetchCryptocurrencies = async (): Promise<Cryptocurrency[]> => {
+// Backend API URL (change to your backend URL)
+const BACKEND_API_URL = "http://localhost:8000/api";
+
+// Fallback to direct CoinGecko API if backend is not available
+const COINGECKO_API_URL = "https://api.coingecko.com/api/v3";
+
+// Default currency
+export const DEFAULT_CURRENCY: Currency = "usd";
+
+// Get user's preferred currency from localStorage or use default
+export const getPreferredCurrency = (): Currency => {
+  const saved = localStorage.getItem("preferredCurrency");
+  return (saved as Currency) || DEFAULT_CURRENCY;
+};
+
+// Save user's preferred currency
+export const savePreferredCurrency = (currency: Currency): void => {
+  localStorage.setItem("preferredCurrency", currency);
+};
+
+export const fetchCryptocurrencies = async (currency: Currency = getPreferredCurrency()): Promise<Cryptocurrency[]> => {
   try {
+    // Try to fetch from our backend first
+    try {
+      const response = await fetch(
+        `${BACKEND_API_URL}/cryptocurrencies?currency=${currency}`
+      );
+
+      if (response.ok) {
+        return await response.json();
+      }
+      
+      // If backend fails, log the error but don't throw yet - we'll try the fallback
+      console.warn("Backend API failed, falling back to CoinGecko direct API");
+    } catch (backendError) {
+      console.warn("Error connecting to backend, falling back to direct API:", backendError);
+    }
+
+    // Fallback to direct CoinGecko API
     const response = await fetch(
-      `${API_URL}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h,7d`
+      `${COINGECKO_API_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h,7d`
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch cryptocurrency data");
+      throw new Error(`Failed to fetch cryptocurrency data: ${response.statusText}`);
     }
 
     return await response.json();
@@ -41,11 +77,21 @@ export const fetchCryptocurrencies = async (): Promise<Cryptocurrency[]> => {
   }
 };
 
-export const formatCurrency = (amount: number): string => {
+// Currency formatting based on selected currency
+export const formatCurrency = (amount: number, currency: Currency = getPreferredCurrency()): string => {
+  const currencyConfig: Record<Currency, { code: string, digits: number }> = {
+    usd: { code: "USD", digits: 2 },
+    eur: { code: "EUR", digits: 2 },
+    kzt: { code: "KZT", digits: 0 }
+  };
+  
+  const config = currencyConfig[currency];
+  const minDigits = amount >= 1 ? config.digits : 6;
+  
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
-    minimumFractionDigits: amount >= 1 ? 2 : 6
+    currency: config.code,
+    minimumFractionDigits: minDigits
   }).format(amount);
 };
 

@@ -1,26 +1,39 @@
-
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import SearchBar from "@/components/SearchBar";
 import CryptoTable from "@/components/CryptoTable";
 import AddToPortfolioDialog from "@/components/AddToPortfolioDialog";
+import CurrencySelector from "@/components/CurrencySelector";
 import Layout from "@/components/Layout";
-import { Cryptocurrency, fetchCryptocurrencies, loadPortfolio, savePortfolio } from "@/services/crypto-api";
+import { 
+  Cryptocurrency, 
+  fetchCryptocurrencies, 
+  loadPortfolio, 
+  savePortfolio,
+  Currency,
+  getPreferredCurrency
+} from "@/services/crypto-api";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCrypto, setSelectedCrypto] = useState<Cryptocurrency | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [portfolio, setPortfolio] = useState(loadPortfolio());
+  const [currency, setCurrency] = useState<Currency>(getPreferredCurrency());
 
-  // Fetch cryptocurrency data
-  const { data: cryptocurrencies = [], isLoading } = useQuery({
-    queryKey: ["cryptocurrencies"],
-    queryFn: fetchCryptocurrencies,
+  // Fetch cryptocurrency data with selected currency
+  const { data: cryptocurrencies = [], isLoading, refetch } = useQuery({
+    queryKey: ["cryptocurrencies", currency],
+    queryFn: () => fetchCryptocurrencies(currency),
     refetchInterval: 60000, // Refetch every minute
     staleTime: 30000, // Consider data stale after 30 seconds
   });
+
+  // Handle currency change
+  const handleCurrencyChange = (newCurrency: Currency) => {
+    setCurrency(newCurrency);
+  };
 
   // Filter cryptocurrencies based on search query
   const filteredCryptocurrencies = cryptocurrencies.filter((crypto) =>
@@ -62,12 +75,16 @@ const Index = () => {
     <Layout>
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-6">Cryptocurrency Markets</h1>
-        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        <div className="flex justify-between items-center mb-4">
+          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          <CurrencySelector onCurrencyChange={handleCurrencyChange} />
+        </div>
       </div>
 
       <CryptoTable 
         cryptocurrencies={filteredCryptocurrencies} 
         isLoading={isLoading}
+        currency={currency}
         onCryptoClick={(crypto) => {
           setSelectedCrypto(crypto);
           setIsDialogOpen(true);
@@ -79,6 +96,7 @@ const Index = () => {
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         onAdd={handleAddToPortfolio}
+        currency={currency}
       />
     </Layout>
   );

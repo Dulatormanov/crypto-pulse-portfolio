@@ -1,18 +1,19 @@
-
 import React from "react";
-import { Cryptocurrency } from "@/services/crypto-api";
+import { Cryptocurrency, Currency } from "@/services/crypto-api";
 import CryptoListItem from "./CryptoListItem";
 import { Loader } from "lucide-react";
 
 interface CryptoTableProps {
   cryptocurrencies: Cryptocurrency[];
   isLoading: boolean;
+  currency: Currency;
   onCryptoClick?: (crypto: Cryptocurrency) => void;
 }
 
 const CryptoTable: React.FC<CryptoTableProps> = ({
   cryptocurrencies,
   isLoading,
+  currency,
   onCryptoClick
 }) => {
   if (isLoading) {
@@ -47,6 +48,7 @@ const CryptoTable: React.FC<CryptoTableProps> = ({
             <CryptoListItem 
               key={crypto.id} 
               crypto={crypto} 
+              currency={currency}
               onClick={() => onCryptoClick && onCryptoClick(crypto)}
             />
           ))}
