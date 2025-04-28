@@ -1,73 +1,121 @@
-# Welcome to your Lovable project
+# Crypto Watcher Project
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/d7d265e1-4ef0-428d-9f1d-e180df7072ab
+Crypto Watcher is a modern web application for tracking cryptocurrencies and managing a personal investment portfolio. Users can view real-time data on major cryptocurrencies, manage their portfolio, see profit/loss calculations, and use an AI assistant to get market analysis.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## Installation and Setup Instructions
 
-**Use Lovable**
+### Backend
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d7d265e1-4ef0-428d-9f1d-e180df7072ab) and start prompting.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Dulatormanov/crypto-pulse-portfolio.git
+   cd crypto-pulse-portfolio/backend
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Create a `.env` file with your API keys:
+   ```
+   OPENAI_API_KEY=your_key
+   COINGECKO_API_KEY=your_key
+   PORT=8000
+   ```
+4. Start the server:
+   ```bash
+   python main_new.py
+   ```
 
-Changes made via Lovable will be committed automatically to this repo.
+### Frontend
 
-**Use your preferred IDE**
+1. Navigate to the project root:
+   ```bash
+   cd ../
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file and add:
+   ```
+   VITE_API_URL=http://localhost:8000/api
+   ```
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Design and Development Process
 
-Follow these steps:
+- Initially developed the UI using React + Vite, focusing on user experience and responsive design
+- Implemented a Python backend that aggregates data from CoinGecko and serves it through a custom API
+- Created a background task system to update data every 60 seconds
+- Added an AI assistant powered by OpenAI for enhanced analytics
+- Deployed the application on Render (backend) and Vercel (frontend)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Unique Approaches and Methodologies
 
-# Step 3: Install the necessary dependencies.
-npm i
+- Background task implementation for regular data updates without client-side overhead
+- LLM assistant integration to provide value-added analysis for users
+- Flexible CORS and environment variable configuration for seamless deployment
+- Frontend automatically falls back to direct CoinGecko API if the backend is unavailable
+- Responsive design that works well on both desktop and mobile devices
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## Trade-offs During Development
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Removed KZT from supported currencies due to CoinGecko API limitations
+- Used pre-built UI components (shadcn/ui) to accelerate development
+- AI assistant provides analysis but not investment advice to avoid liability issues
+- Limited historical data to maintain performance and stay within API rate limits
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Known Issues or Limitations
 
-## What technologies are used for this project?
+- Potential delays during first request to backend on free Render tier (cold start)
+- Possible 429 errors (Too Many Requests) when exceeding CoinGecko API limits
+- CORS issues may occur with incorrect environment variable configuration
+- Portfolio data is stored in localStorage and not persisted across devices
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Technology Stack Justification
 
-## How can I deploy this project?
+- **React + TypeScript + Vite**: Fast development cycle, modern SPA approach, excellent TypeScript support
+- **Python**: Simplifies integration with external APIs, rich ecosystem for data processing
+- **Render/Vercel**: Free and quick deployment, simple CI/CD setup
+- **OpenAI**: Powerful LLM for extending application functionality with market analysis
+- **Tailwind + shadcn/ui**: Rapid UI development with consistent styling
 
-Simply open [Lovable](https://lovable.dev/projects/d7d265e1-4ef0-428d-9f1d-e180df7072ab) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## Demo Video
 
-Yes, you can!
+https://drive.google.com/file/d/1DWlQOq7NK34XEkWgu4JKe8q10J8APy2R/view?usp=sharing
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Deployment
+
+- **Frontend**: https://crypto-pulse-portfolio-21gd.vercel.app/
+- **Backend**: https://crypto-watcher-n4x4.onrender.com/api/status
+
+---
+
+## External Services
+
+- All external APIs (CoinGecko, OpenAI) are called exclusively from the backend.
+
+---
+
+**This repository is public and does not contain zip files.**
